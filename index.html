@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Currency Converter Calculator</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            background: #fff;
+            padding: 40px 24px;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgb(0, 0, 1);
+            width: 360px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .amount p,
+        .select-box p {
+            margin-bottom: 8px;
+        }
+
+        .amount input {
+            width: 100%;
+            padding: 8px;
+            font-size: 16px;
+        }
+
+        .dropdowns {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .select {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+            border: 1px solid #ccc;
+            padding: 8px;
+            border-radius: 6px;
+        }
+
+        .select img {
+            width: 24px;
+            height: 18px;
+        }
+
+        .swap i {
+            font-size: 20px;
+            color: #cb1237fa;
+            cursor: pointer;
+            margin-top: 22px;
+            transition: transform 0.3s;
+        }
+
+        .swap i:hover {
+            transform: rotate(180deg);
+            color: #ff0033fc;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            background: #ed103cc8;
+            box-shadow: 0 3px 9px rgb(155, 144, 172);
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            box-shadow: 0 3px 10px rgb(33 20 32 / 98%);
+            background: #cb1237f6;
+        }
+
+        #result {
+            font-weight: bold;
+            font-size: 16px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="wrapper">
+        <h1>Currency Converter</h1>
+
+        <div class="amount">
+            <p>Enter Amount</p>
+            <input type="number" id="amount" value="1">
+        </div>
+
+        <div class="dropdowns">
+            <div class="select-box">
+                <p>From</p>
+                <div class="select">
+                    <img id="fromFlag" src="flags/us.png" alt="USD flag">
+                    <select id="from" onchange="updateFlag('from')">
+                        <option value="USD" selected>USD</option>
+                        <option value="INR">INR</option>
+                        <option value="EUR">EUR</option>
+                        <option value="GBP">GBP</option>
+                        <option value="JPY">JPY</option>
+                        <option value="AUD">AUD</option>
+                        <option value="CAD">CAD</option>
+                        <option value="CNY">CNY</option>
+                        <option value="SAR">SAR</option>
+                        <option value="AED">AED</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="swap" onclick="swapCurrencies()"><i class="fas fa-right-left"></i></div>
+
+            <div class="select-box">
+                <p>To</p>
+                <div class="select">
+                    <img id="toFlag" src="flags/in.png" alt="INR flag">
+                    <select id="to" onchange="updateFlag('to')">
+                        <option value="USD">USD</option>
+                        <option value="INR" selected>INR</option>
+                        <option value="EUR">EUR</option>
+                        <option value="GBP">GBP</option>
+                        <option value="JPY">JPY</option>
+                        <option value="AUD">AUD</option>
+                        <option value="CAD">CAD</option>
+                        <option value="CNY">CNY</option>
+                        <option value="SAR">SAR</option>
+                        <option value="AED">AED</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div id="result">Enter amount and click Convert</div>
+
+        <button onclick="convertCurrency()">Convert</button>
+    </div>
+    <div id="glass-overlay"></div>
+
+    <script>
+        // Fixed exchange rates (base = USD)
+        const rates = {
+            "USD": 1, "INR": 83, "EUR": 0.92, "GBP": 0.79,
+            "JPY": 150, "AUD": 1.52, "CAD": 1.36,
+            "CNY": 7.25, "SAR": 3.75, "AED": 3.67
+        };
+
+        // Local flag mapping
+        const country = {
+            "USD": "us.png", "INR": "in.png", "EUR": "eu.png",
+            "GBP": "gb.png", "JPY": "jp.png", "AUD": "au.png",
+            "CAD": "ca.png", "CNY": "cn.png", "SAR": "sa.png", "AED": "ae.png"
+        };
+
+        const bgImages = {
+            "USD": "flags/us.png",
+            "INR": "flags/in.png",
+            "EUR": "flags/eu.png",
+            "GBP": "flags/gb.png",
+            "JPY": "flags/jp.png",
+            "AUD": "flags/au.png",
+            "CAD": "flags/ca.png",
+            "CNY": "flags/cn.png",
+            "SAR": "flags/sa.png",
+            "AED": "flags/ae.png"
+        };
+
+        function updateFlag(type) {
+            let currency = document.getElementById(type).value;
+
+            // Update the dropdown flag
+            document.getElementById(type + "Flag").src = "flags/" + country[currency];
+
+            // Update the background only if type is "from"
+            if (type === "from") {
+                document.body.style.backgroundImage = `url(flags/${country[currency]})`;
+                document.body.style.backgroundSize = "100%";
+                document.body.style.backgroundPosition = "center";
+                document.body.style.backgroundRepeat = "no-repeat";
+            }
+        }
+        function swapCurrencies() {
+            let fromSelect = document.getElementById("from");
+            let toSelect = document.getElementById("to");
+            let temp = fromSelect.value;
+            fromSelect.value = toSelect.value;
+            toSelect.value = temp;
+            updateFlag("from");
+            updateFlag("to");
+        }
+
+        function convertCurrency() {
+            let amt = parseFloat(document.getElementById("amount").value);
+            if (isNaN(amt) || amt <= 0) {
+                document.getElementById("result").innerText = "Please enter a valid amount !";
+                return;
+            }
+            let from = document.getElementById("from").value;
+            let to = document.getElementById("to").value;
+            let usdAmount = amt / rates[from];
+            let converted = usdAmount * rates[to];
+            document.getElementById("result").innerText =
+                `${amt} ${from} = ${converted.toFixed(2)} ${to}`;
+            // Update flags in the calculator
+            updateFlag("from");
+            updateFlag("to");
+            document.body.style.backgroundImage = `url(flags/${country[to]})`;
+            document.body.style.backgroundSize = "100%";
+            document.body.style.backgroundPosition = "center";
+            document.body.style.backgroundRepeat = "no-repeat";
+
+        }
+        const fromCurrency = document.getElementById("from").value;
+        document.body.style.backgroundImage = `url(flags/${country[fromCurrency]})`;
+        document.body.style.backgroundSize = "100%";
+        document.body.style.backgroundPosition = "center";
+        document.body.style.backgroundRepeat = "no-repeat";
+    </script>
+</body>
+
+</html>
