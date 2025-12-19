@@ -3,108 +3,330 @@
 
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Currency Converter Calculator</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
     <style>
+        :root {
+            --bg-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --wrapper-bg: rgba(255, 255, 255, 0.95);
+            --text-color: #333;
+            --input-bg: rgba(255, 255, 255, 0.8);
+            --border-color: #e1e5e9;
+            --accent-color: #667eea;
+            --button-bg: linear-gradient(135deg, #667eea, #764ba2);
+            --success-bg: rgba(76, 175, 80, 0.1);
+            --error-bg: rgba(244, 67, 54, 0.1);
+            --shadow: rgba(0, 0, 0, 0.1);
+        }
+
+        [data-theme="dark"] {
+            --bg-gradient: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            --wrapper-bg: rgba(30, 30, 30, 0.95);
+            --text-color: #fffefe;
+            --input-bg: rgba(0, 0, 0, 0.8);
+            --border-color: #555;
+            --accent-color: #764ba2;
+            --button-bg: linear-gradient(135deg, #764ba2, #667eea);
+            --success-bg: rgba(76, 175, 80, 0.2);
+            --error-bg: rgba(244, 67, 54, 0.2);
+            --shadow: rgba(0, 0, 0, 0.3);
+        }
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: Arial, sans-serif;
+            font-family: 'Poppins', sans-serif;
         }
 
         body {
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
+            min-height: 100vh;
+            background: var(--bg-gradient);
+            background-attachment: fixed;
+            position: relative;
+            overflow-x: hidden;
+            transition: background 0.3s ease;
+        }
+
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--bg-gradient);
+            z-index: -2;
+        }
+
+        .bg-flag {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('flags/us.png') center/cover no-repeat;
+            opacity: 0.1;
+            z-index: -1;
+            transition: background 0.3s ease;
+        }
+
+        .theme-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: var(--wrapper-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border-color);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px var(--shadow);
+        }
+
+        .theme-toggle:hover {
+            transform: scale(1.1);
+        }
+
+        .theme-toggle i {
+            font-size: 20px;
+            color: var(--text-color);
         }
 
         .wrapper {
             display: flex;
             flex-direction: column;
-            gap: 20px;
-            background: #fff;
-            padding: 40px 24px;
-            border-radius: 12px;
-            box-shadow: 0 5px 15px rgb(0, 0, 1);
-            width: 360px;
+            gap: 25px;
+            background: var(--wrapper-bg);
+            backdrop-filter: blur(20px);
+            padding: 40px 30px;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px var(--shadow);
+            width: 100%;
+            max-width: 400px;
             text-align: center;
-            font-weight: bold;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            animation: fadeInUp 0.8s ease-out;
+            position: relative;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h1 {
+            color: var(--text-color);
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px var(--shadow);
         }
 
         .amount p,
         .select-box p {
-            margin-bottom: 8px;
+            margin-bottom: 10px;
+            color: var(--text-color);
+            font-weight: 500;
+            font-size: 14px;
         }
 
         .amount input {
             width: 100%;
-            padding: 8px;
-            font-size: 16px;
+            padding: 15px;
+            font-size: 18px;
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            outline: none;
+            transition: all 0.3s ease;
+            background: var(--input-bg);
+            color: var(--text-color);
+        }
+
+        .amount input:focus {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
         }
 
         .dropdowns {
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 20px;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .select-box {
+            flex: 1;
+            min-width: 120px;
         }
 
         .select {
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 7px;
-            border: 1px solid #ccc;
-            padding: 8px;
-            border-radius: 6px;
+            gap: 10px;
+            border: 2px solid var(--border-color);
+            padding: 12px;
+            border-radius: 12px;
+            background: var(--input-bg);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .select:hover {
+            border-color: var(--accent-color);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
         }
 
         .select img {
-            width: 24px;
-            height: 18px;
+            width: 28px;
+            height: 20px;
+            border-radius: 4px;
+            box-shadow: 0 1px 3px var(--shadow);
+        }
+
+        .select select {
+            border: none;
+            outline: none;
+            background: transparent;
+            font-size: 16px;
+            font-weight: 500;
+            color: var(--text-color);
+            cursor: pointer;
+        }
+
+        .select select option {
+            background: var(--input-bg);
+            color: var(--text-color);
+        }
+
+        .swap {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 50px;
+            height: 50px;
+            background: var(--button-bg);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .swap:hover {
+            transform: scale(1.1) rotate(180deg);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
         }
 
         .swap i {
             font-size: 20px;
-            color: #cb1237fa;
-            cursor: pointer;
-            margin-top: 22px;
-            transition: transform 0.3s;
-        }
-
-        .swap i:hover {
-            transform: rotate(180deg);
-            color: #ff0033fc;
+            color: white;
         }
 
         button {
             width: 100%;
-            padding: 10px;
-            background: #ed103cc8;
-            box-shadow: 0 3px 9px rgb(155, 144, 172);
+            padding: 15px;
+            background: var(--button-bg);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
             color: #fff;
             border: none;
-            border-radius: 6px;
-            font-size: 16px;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 600;
             cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
         }
 
         button:hover {
-            box-shadow: 0 3px 10px rgb(33 20 32 / 98%);
-            background: #cb1237f6;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
         }
 
         #result {
-            font-weight: bold;
-            font-size: 16px;
+            font-weight: 600;
+            font-size: 18px;
+            color: var(--text-color);
+            padding: 15px;
+            background: var(--input-bg);
+            border-radius: 12px;
+            border: 2px solid var(--border-color);
+            min-height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        #result.success {
+            border-color: #4CAF50;
+            background: var(--success-bg);
+        }
+
+        #result.error {
+            border-color: #f44336;
+            background: var(--error-bg);
+        }
+
+        @media (max-width: 480px) {
+            .wrapper {
+                padding: 30px 20px;
+                max-width: 350px;
+            }
+
+            .dropdowns {
+                gap: 10px;
+            }
+
+            .select-box {
+                min-width: 100px;
+            }
+
+            h1 {
+                font-size: 24px;
+            }
+
+            .theme-toggle {
+                top: 10px;
+                right: 10px;
+                width: 40px;
+                height: 40px;
+            }
+
+            .theme-toggle i {
+                font-size: 16px;
+            }
         }
     </style>
 </head>
 
 <body>
+    <div class="bg-flag"></div>
+    <div class="theme-toggle" onclick="toggleTheme()" title="Toggle Theme">
+        <i class="fas fa-moon"></i>
+    </div>
     <div class="wrapper">
         <h1>Currency Converter</h1>
 
@@ -159,7 +381,6 @@
 
         <button onclick="convertCurrency()">Convert</button>
     </div>
-    <div id="glass-overlay"></div>
 
     <script>
         // Fixed exchange rates (base = USD)
@@ -176,33 +397,16 @@
             "CAD": "ca.png", "CNY": "cn.png", "SAR": "sa.png", "AED": "ae.png"
         };
 
-        const bgImages = {
-            "USD": "flags/us.png",
-            "INR": "flags/in.png",
-            "EUR": "flags/eu.png",
-            "GBP": "flags/gb.png",
-            "JPY": "flags/jp.png",
-            "AUD": "flags/au.png",
-            "CAD": "flags/ca.png",
-            "CNY": "flags/cn.png",
-            "SAR": "flags/sa.png",
-            "AED": "flags/ae.png"
-        };
-
         function updateFlag(type) {
             let currency = document.getElementById(type).value;
-
             // Update the dropdown flag
             document.getElementById(type + "Flag").src = "flags/" + country[currency];
-
-            // Update the background only if type is "from"
+            // Update background flag if "from"
             if (type === "from") {
-                document.body.style.backgroundImage = `url(flags/${country[currency]})`;
-                document.body.style.backgroundSize = "100%";
-                document.body.style.backgroundPosition = "center";
-                document.body.style.backgroundRepeat = "no-repeat";
+                document.querySelector('.bg-flag').style.backgroundImage = `url(flags/${country[currency]})`;
             }
         }
+
         function swapCurrencies() {
             let fromSelect = document.getElementById("from");
             let toSelect = document.getElementById("to");
@@ -214,31 +418,43 @@
         }
 
         function convertCurrency() {
+            let resultDiv = document.getElementById("result");
+            resultDiv.classList.remove("success", "error");
+
             let amt = parseFloat(document.getElementById("amount").value);
             if (isNaN(amt) || amt <= 0) {
-                document.getElementById("result").innerText = "Please enter a valid amount !";
+                resultDiv.innerText = "Please enter a valid amount!";
+                resultDiv.classList.add("error");
                 return;
             }
             let from = document.getElementById("from").value;
             let to = document.getElementById("to").value;
             let usdAmount = amt / rates[from];
             let converted = usdAmount * rates[to];
-            document.getElementById("result").innerText =
-                `${amt} ${from} = ${converted.toFixed(2)} ${to}`;
+            resultDiv.innerText = `${amt} ${from} = ${converted.toFixed(2)} ${to}`;
+            resultDiv.classList.add("success");
             // Update flags in the calculator
             updateFlag("from");
             updateFlag("to");
-            document.body.style.backgroundImage = `url(flags/${country[to]})`;
-            document.body.style.backgroundSize = "100%";
-            document.body.style.backgroundPosition = "center";
-            document.body.style.backgroundRepeat = "no-repeat";
-
+            // Update background to "to" flag
+            document.querySelector('.bg-flag').style.backgroundImage = `url(flags/${country[to]})`;
         }
-        const fromCurrency = document.getElementById("from").value;
-        document.body.style.backgroundImage = `url(flags/${country[fromCurrency]})`;
-        document.body.style.backgroundSize = "100%";
-        document.body.style.backgroundPosition = "center";
-        document.body.style.backgroundRepeat = "no-repeat";
+
+        function toggleTheme() {
+            const html = document.documentElement;
+            const themeIcon = document.querySelector('.theme-toggle i');
+            if (html.getAttribute('data-theme') === 'dark') {
+                html.removeAttribute('data-theme');
+                themeIcon.className = 'fas fa-moon';
+            } else {
+                html.setAttribute('data-theme', 'dark');
+                themeIcon.className = 'fas fa-sun';
+            }
+        }
+
+        // Initialize flags
+        updateFlag("from");
+        updateFlag("to");
     </script>
 </body>
 
